@@ -40,14 +40,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderListDto findAllOrdersDtoByUserId(Long id) {
-//        return new OrderListDto(orderRepository.findAllByUserId(id).stream()
-//                .map(OrderMapper.INSTANCE::orderToOrderDto)
-//                .map(o -> {
-//                    o.setOrderUrl(getOrderUrl() + o.getId());
-//                    o.setUserId(o.getUserId());
-//                    return o;})
-//                .collect(Collectors.toList()));
-        return null;
+        return new OrderListDto(orderRepository.findAllByUserId(id).stream()
+                .map(OrderMapper.INSTANCE::orderToOrderDto)
+                .map(o -> {
+                    o.setOrderUrl(getOrderUrl() + o.getId());
+                    o.setUserId(o.getUserId());
+                    return o;})
+                .collect(Collectors.toList()));
+    }
+
+    @Override
+    public OrderListDto findAllOrdersByOrderStatus(String orderStatus) {
+
+        OrderStatus status = null;
+
+        try {
+            status = OrderStatus.valueOf(orderStatus);
+            return new OrderListDto(orderRepository
+                    .findAllByOrderStatus(status).stream()
+                    .map(OrderMapper.INSTANCE::orderToOrderDto).collect(Collectors.toList()));
+        } catch (IllegalArgumentException e) {
+            throw new ResourceNotFoundException(String.format("Order status: %s can not be parsed.",orderStatus), e);
+        }
     }
 
     @Override
@@ -128,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
 
         Optional.ofNullable(orderDto.getOrderStatus()).ifPresent(o -> {
             if (!o.isBlank()) {
-                actualOrder.setCcCVV(o);
+                actualOrder.setOrderStatus(o);
             }
         });
 

@@ -20,7 +20,13 @@ public class OrderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public OrderListDto displayAllOrders() {
+    public OrderListDto displayAllOrders(@RequestParam(required = false) String orderStatus,
+                                         @RequestParam(required = false) Long userId) {
+        if (orderStatus != null && !orderStatus.isBlank()) {
+            return orderService.findAllOrdersByOrderStatus(orderStatus);
+        } else if (userId != null) {
+            return orderService.findAllOrdersDtoByUserId(userId);
+        }
         return orderService.findAllOrdersDto();
     }
 
